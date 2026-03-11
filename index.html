@@ -1,12 +1,145 @@
-<html>
-    <header>
-        <title>Practice makes perfect</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Form Builder</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
+        .question-block { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 8px; background: #f9f9f9; }
+        .header-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .question-text { flex-grow: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .remove-btn { background: #ff4d4d; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; }
+        .input-container { display: flex; gap: 10px; align-items: center; }
+        select, input[type="text"], input[type="number"], input[type="date"] { padding: 8px; border-radius: 4px; border: 1px solid #ccc; }
+        .controls { margin-top: 20px; display: flex; gap: 10px; }
+        .btn-add { background: #28a745; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; }
+        .btn-share { background: #007bff; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; }
+    </style>
+</head>
+<body>
 
-    </header>
-    <body>
-        <h1>Practice Makes Perfect</h1>
+    <h2>Form Builder</h2>
+
+    <div id="form-container">
+        <!-- Initial Question Block (Template) -->
+        <div class="question-block">
+            <div class="header-row">
+                <input type="text" class="question-text" placeholder="Enter your question">
+                <button class="remove-btn" onclick="removeQuestion(this)">×</button>
+            </div>
+
+            <div class="input-container">
+                <select class="typeSelector" onchange="updateInputType(this)">
+                    <option value="text">Text</option>
+                    <option value="number">Number</option>
+                    <option value="date">Date</option>
+                    <option value="color">Color</option>
+                </select>
+                <input class="dynamicInput" type="text" placeholder="Answer preview...">
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn-add" onclick="addQuestion()">+ Add Next Question</button>
+        <button class="btn-share" onclick="generateShareLink()">Generate Shareable Link</button>
+    </div>
+
+    <script>
+    // 1. Update input visual based on dropdown selection
+    function updateInputType(selector) {
+        const parent = selector.closest('.input-container');
+        const input = parent.querySelector('.dynamicInput');
+        input.type = selector.value;
+    }
+
+    // 2. Remove a question block
+    function removeQuestion(button) {
+        const block = button.closest('.question-block');
+        const allBlocks = document.querySelectorAll('.question-block');
+        if (allBlocks.length > 1) {
+            block.remove();
+        } else {
+            alert("You must have at least one question!");
+        }
+    }
+
+    // 3. UPDATED: Add a new question using a template string instead of cloning
+    function addQuestion(text = "", type = "text") {
+        const container = document.getElementById('form-container');
         
+        const newBlock = document.createElement('div');
+        newBlock.className = 'question-block';
+        newBlock.innerHTML = `
+            <div class="header-row">
+                <input type="text" class="question-text" placeholder="Enter your question" value="${text}">
+                <button class="remove-btn" onclick="removeQuestion(this)">×</button>
+            </div>
+            <div class="input-container">
+                <select class="typeSelector" onchange="updateInputType(this)">
+                    <option value="text" ${type === 'text' ? 'selected' : ''}>Text</option>
+                    <option value="number" ${type === 'number' ? 'selected' : ''}>Number</option>
+                    <option value="date" ${type === 'date' ? 'selected' : ''}>Date</option>
+                    <option value="color" ${type === 'color' ? 'selected' : ''}>Color</option>
+                    <option value="password" ${type === 'password' ? 'selected' : ''}>Password</option>
+                </select>
+                <input class="dynamicInput" type="${type}" placeholder="Answer preview...">
+            </div>
+        `;
+        
+        container.appendChild(newBlock);
+    }
 
+    // 4. GENERATE LINK: Save data into URL
+    function generateShareLink() {
+        const questions = [];
+        document.querySelectorAll('.question-block').forEach(block => {
+            const qValue = block.querySelector('.question-text').value;
+            const tValue = block.querySelector('.typeSelector').value;
+            if(qValue || tValue) {
+                questions.push({ q: qValue, t: tValue });
+            }
+        });
 
-    </body>
+        const jsonData = JSON.stringify(questions);
+        // Use btoa safely for browser URLs
+        const encodedData = btoa(encodeURIComponent(jsonData));
+        
+        const url = new URL(window.location.href);
+        url.searchParams.set('f', encodedData);
+        
+        navigator.clipboard.writeText(url.href).then(() => {
+            alert("Shareable link copied to clipboard!");
+            // Update address bar without refreshing
+            window.history.pushState({}, '', url.href);
+        });
+    }
+
+    // 5. LOAD ON START: Check URL for data
+    window.addEventListener('load', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const encodedForm = urlParams.get('f');
+
+        if (encodedForm) {
+            try {
+                const jsonData = decodeURIComponent(atob(encodedForm));
+                const questions = JSON.parse(jsonData);
+                
+                if (questions.length > 0) {
+                    // Clear the initial empty block
+                    document.getElementById('form-container').innerHTML = "";
+                    // Rebuild form from URL data
+                    questions.forEach(item => {
+                        addQuestion(item.q, item.t);
+                    });
+                }
+            } catch (e) {
+                console.error("Failed to load form data:", e);
+            }
+        }
+    });
+</script>
+
+</body>
 </html>
