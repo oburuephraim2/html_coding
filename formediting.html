@@ -1,0 +1,271 @@
+1. Update the Inspector HTML Structure
+First, modify the inspector div in your HTML to include a new section for form-specific elements. This section will be conditionally displayed.
+
+<!-- Inside <div id="inspector">, find "Add Elements" and add this section below it -->
+<div id="form-element-creator" style="display: none;">
+    <label class="inspector-label">Add Form Elements</label>
+    <div class="d-grid gap-2 mb-4">
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addFormElement('text')">+ Text Input</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addFormElement('email')">+ Email Input</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addFormElement('password')">+ Password Input</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addFormElement('checkbox')">+ Checkbox</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addFormElement('radio')">+ Radio Button</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addFormElement('textarea')">+ Textarea</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addFormElement('select')">+ Select Dropdown</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addFormElement('submit')">+ Submit Button</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addFormElement('label')">+ Label</button>
+    </div>
+</div>
+
+<!-- ... existing element-inspector ... -->
+
+<div id="form-element-properties" style="display: none;">
+    <label class="inspector-label">Form Element Properties</label>
+    <div class="mb-2">
+        <label for="formElementName" class="form-label small">Name</label>
+        <input type="text" class="form-control form-control-sm" id="formElementName" oninput="updateElementAttribute('name', this.value)">
+    </div>
+    <div class="mb-2" id="formElementPlaceholderContainer">
+        <label for="formElementPlaceholder" class="form-label small">Placeholder</label>
+        <input type="text" class="form-control form-control-sm" id="formElementPlaceholder" oninput="updateElementAttribute('placeholder', this.value)">
+    </div>
+    <div class="mb-2" id="formElementValueContainer">
+        <label for="formElementValue" class="form-label small">Value</label>
+        <input type="text" class="form-control form-control-sm" id="formElementValue" oninput="updateElementAttribute('value', this.value)">
+    </div>
+    <div class="mb-2" id="formElementForContainer">
+        <label for="formElementFor" class="form-label small">Label For (ID)</label>
+        <input type="text" class="form-control form-control-sm" id="formElementFor" oninput="updateElementAttribute('for', this.value)">
+    </div>
+    <div class="mb-2" id="formElementTypeContainer">
+        <label for="formElementType" class="form-label small">Input Type</label>
+        <select class="form-control form-control-sm" id="formElementType" onchange="updateElementAttribute('type', this.value)">
+            <option value="text">text</option>
+            <option value="email">email</option>
+            <option value="password">password</option>
+            <option value="number">number</option>
+            <option value="date">date</option>
+        </select>
+    </div>
+    <div class="mb-2" id="formElementCheckedContainer">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="formElementChecked" onchange="updateElementAttribute('checked', this.checked)">
+            <label class="form-check-label" for="formElementChecked">Checked</label>
+        </div>
+    </div>
+    <!-- Add more properties for select options later if needed -->
+</div>
+2. Modify selectSection Function
+Update selectSection to show/hide the form-specific controls in the inspector based on whether a form type section is active.
+
+// Inside function selectSection(wrapper) {
+// ... existing code ...
+
+        document.getElementById('element-inspector').style.display = 'none'; // Hide general element inspector
+
+        const formElementCreator = document.getElementById('form-element-creator');
+        const formElementProperties = document.getElementById('form-element-properties');
+
+        if (wrapper.dataset.type === 'form') {
+            formElementCreator.style.display = 'block';
+        } else {
+            formElementCreator.style.display = 'none';
+        }
+        formElementProperties.style.display = 'none'; // Hide by default until a form element is selected
+
+// ... rest of the function ...
+}
+3. Add addFormElement Function
+Create a new JavaScript function addFormElement to dynamically create and append various form input types.
+
+function addFormElement(type) {
+    if (!activeWrapper || activeWrapper.dataset.type !== 'form') return;
+
+    // Find the innermost container within the form section
+    const formContainer = activeWrapper.querySelector('form') || activeWrapper.querySelector('.container') || activeWrapper.querySelector('section, footer');
+    if (!formContainer) return;
+
+    let elementHtml = '';
+    const uniqueId = 'input-' + Date.now(); // Generate a unique ID
+
+    switch(type) {
+        case 'text':
+        case 'email':
+        case 'password':
+            elementHtml = `
+                <div class="mb-3">
+                    <label for="${uniqueId}" class="form-label" contenteditable="true">${type.charAt(0).toUpperCase() + type.slice(1)}</label>
+                    <input type="${type}" class="form-control" id="${uniqueId}" name="${uniqueId}" placeholder="Enter ${type}">
+                </div>`;
+            break;
+        case 'textarea':
+            elementHtml = `
+                <div class="mb-3">
+                    <label for="${uniqueId}" class="form-label" contenteditable="true">Message</label>
+                    <textarea class="form-control" id="${uniqueId}" name="${uniqueId}" rows="3" placeholder="Your message"></textarea>
+                </div>`;
+            break;
+        case 'select':
+            elementHtml = `
+                <div class="mb-3">
+                    <label for="${uniqueId}" class="form-label" contenteditable="true">Select Option</label>
+                    <select class="form-select" id="${uniqueId}" name="${uniqueId}">
+                        <option value="option1" contenteditable="true">Option 1</option>
+                        <option value="option2" contenteditable="true">Option 2</option>
+                    </select>
+                </div>`;
+            break;
+        case 'checkbox':
+            elementHtml = `
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="${uniqueId}" name="${uniqueId}">
+                    <label class="form-check-label" for="${uniqueId}" contenteditable="true">Check me out</label>
+                </div>`;
+            break;
+        case 'radio':
+            const radioGroupName = 'radio-group-' + Date.now();
+            elementHtml = `
+                <div class="mb-3">
+                    <label class="form-label" contenteditable="true">Radio Group Title</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="${radioGroupName}" id="${uniqueId}-1" value="option1">
+                        <label class="form-check-label" for="${uniqueId}-1" contenteditable="true">Radio Option 1</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="${radioGroupName}" id="${uniqueId}-2" value="option2">
+                        <label class="form-check-label" for="${uniqueId}-2" contenteditable="true">Radio Option 2</label>
+                    </div>
+                </div>`;
+            break;
+        case 'submit':
+            elementHtml = `<button type="submit" class="btn btn-primary my-3" contenteditable="true">Submit</button>`;
+            break;
+        case 'label':
+             elementHtml = `<label for="" class="form-label my-2" contenteditable="true">New Label</label>`;
+             break;
+    }
+
+    if (elementHtml) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = elementHtml.trim();
+        const newElement = tempDiv.firstElementChild;
+
+        formContainer.appendChild(newElement);
+
+        // Make newly added elements clickable for selection
+        // If the element is a container (like mb-3 for text input), make its direct children clickable
+        if (newElement.classList.contains('mb-3')) {
+            newElement.querySelectorAll('input, textarea, select, label, button').forEach(el => {
+                el.onclick = (e) => { e.stopPropagation(); selectElement(el); };
+                if (el.hasAttribute('contenteditable')) el.onblur = saveState;
+            });
+        } else {
+             newElement.onclick = (e) => { e.stopPropagation(); selectElement(newElement); };
+             if (newElement.hasAttribute('contenteditable')) newElement.onblur = saveState;
+        }
+
+        saveState();
+        selectElement(newElement); // Select the newly added element
+    }
+}
+4. Enhance populateElementInspector for Form Elements
+This function needs significant updates to display the correct properties when a form element (input, textarea, select, label, button) is selected.
+
+// Inside function populateElementInspector() {
+// ... existing code ...
+
+    // Hide all form element property fields initially
+    const formElementPropertiesDiv = document.getElementById('form-element-properties');
+    formElementPropertiesDiv.style.display = 'none';
+    document.getElementById('formElementName').parentElement.style.display = 'none';
+    document.getElementById('formElementPlaceholderContainer').style.display = 'none';
+    document.getElementById('formElementValueContainer').style.display = 'none';
+    document.getElementById('formElementForContainer').style.display = 'none';
+    document.getElementById('formElementTypeContainer').style.display = 'none';
+    document.getElementById('formElementCheckedContainer').style.display = 'none';
+
+    // General element properties
+    document.getElementById('elementId').value = selectedElement.id;
+    document.getElementById('elementClass').value = selectedElement.className;
+
+    // ... existing logic for src, href ...
+
+    // Form element specific properties
+    if (selectedElement.tagName === 'INPUT' || selectedElement.tagName === 'TEXTAREA' || selectedElement.tagName === 'SELECT' || selectedElement.tagName === 'LABEL' || selectedElement.tagName === 'BUTTON') {
+        formElementPropertiesDiv.style.display = 'block';
+        document.getElementById('formElementName').parentElement.style.display = 'block';
+        document.getElementById('formElementName').value = selectedElement.name || '';
+
+        if (selectedElement.tagName === 'INPUT') {
+            document.getElementById('formElementTypeContainer').style.display = 'block';
+            document.getElementById('formElementType').value = selectedElement.type || 'text';
+
+            if (selectedElement.type === 'text' || selectedElement.type === 'email' || selectedElement.type === 'password' || selectedElement.type === 'number') {
+                document.getElementById('formElementPlaceholderContainer').style.display = 'block';
+                document.getElementById('formElementPlaceholder').value = selectedElement.placeholder || '';
+                document.getElementById('formElementValueContainer').style.display = 'block';
+                document.getElementById('formElementValue').value = selectedElement.value || '';
+            } else if (selectedElement.type === 'checkbox' || selectedElement.type === 'radio') {
+                document.getElementById('formElementValueContainer').style.display = 'block';
+                document.getElementById('formElementValue').value = selectedElement.value || '';
+                document.getElementById('formElementCheckedContainer').style.display = 'block';
+                document.getElementById('formElementChecked').checked = selectedElement.checked;
+            }
+        } else if (selectedElement.tagName === 'TEXTAREA') {
+            document.getElementById('formElementPlaceholderContainer').style.display = 'block';
+            document.getElementById('formElementPlaceholder').value = selectedElement.placeholder || '';
+        } else if (selectedElement.tagName === 'LABEL') {
+            document.getElementById('formElementForContainer').style.display = 'block';
+            document.getElementById('formElementFor').value = selectedElement.htmlFor || '';
+        }
+
+        // Also manage text content for editable form elements
+        if (selectedElement.hasAttribute('contenteditable') || selectedElement.tagName === 'BUTTON' || selectedElement.tagName === 'LABEL' || selectedElement.tagName === 'OPTION') {
+            textContentContainer.style.display = 'block';
+            document.getElementById('elementTextContent').value = selectedElement.innerHTML; // Use innerHTML for rich contenteditable and general text
+        }
+    }
+
+    // Ensure general element inspector is hidden if a form element is selected with its specific properties
+    if (formElementPropertiesDiv.style.display === 'block') {
+        document.getElementById('element-inspector').style.display = 'none';
+    }
+
+// ... rest of the function ...
+}
+5. Update updateElementAttribute and updateElementText
+Expand these functions to handle new attributes and text content relevant to form elements.
+
+// Inside function updateElementAttribute(attributeName, value) {
+// ... existing code ...
+
+        if (attributeName === 'className') {
+            selectedElement.className = value;
+        } else if (attributeName === 'checked') {
+            selectedElement.checked = value;
+        } else if (attributeName === 'for') {
+            selectedElement.htmlFor = value; // Special handling for 'for' attribute of labels
+        } else {
+            selectedElement.setAttribute(attributeName, value);
+        }
+        saveState();
+// ... rest of the function ...
+}
+
+// Inside function updateElementText(value) {
+// ... existing code ...
+
+        if (selectedElement.hasAttribute('contenteditable') || selectedElement.tagName === 'BUTTON' || selectedElement.tagName === 'LABEL' || selectedElement.tagName === 'OPTION') {
+            selectedElement.innerHTML = value;
+        } else if (selectedElement.children.length === 0) { // For non-contenteditable elements with direct text
+            selectedElement.textContent = value;
+        }
+        saveState();
+// ... rest of the function ...
+}
+6. Important Considerations and Additional Modifications:
+Event Listeners for Existing Elements: When loadLocalState() or addSection() runs, ensure that newly loaded/created form elements (inputs, labels, etc.) also have an onclick handler to enable selectElement(el) on them. You might need a more robust way to attach these handlers. The current wrapper.querySelectorAll('*').forEach(...) should catch most, but explicitly check for form elements.
+Form Submission: Currently, the builder focuses on layout. If you intend for the forms to be functional, you'd need server-side logic, which is outside the scope of this builder.
+Radio Button Groups: When adding radio buttons, ensure they share a name attribute so only one can be selected in a group.
+Select Options: For select elements, editing options (<option>) would require a more advanced sub-inspector or a modal for managing a list of options.
+By carefully integrating these changes into your HTML and JavaScript, you will significantly enhance the editing capabilities for form sections in your builder.
