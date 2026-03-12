@@ -1,350 +1,181 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Section Website Builder</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootstrap Section Builder</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <style>
+        /* Minimal layout CSS - Bootstrap handles the rest */
         body {
-            margin: 0;
-            font-family: sans-serif;
             display: flex;
             height: 100vh;
+            overflow: hidden;
         }
-
-        /* Sidebar */
-
         #sidebar {
-            width: 230px;
-            background: #111;
+            width: 280px;
+            background: #212529;
             color: white;
             padding: 20px;
+            overflow-y: auto;
+            z-index: 1000;
         }
-
-        #sidebar button {
-            width: 100%;
-            margin-bottom: 10px;
-            padding: 10px;
-            border: none;
-            background: #333;
-            color: white;
-            cursor: pointer;
-        }
-
-        /* Canvas */
-
         #canvas {
             flex: 1;
-            overflow: auto;
-            background: #f4f4f4;
-            padding: 30px;
+            overflow-y: auto;
+            background: #f8f9fa;
         }
-
-        /* Sections */
-
-        .section {
-            background: white;
-            margin-bottom: 30px;
-            padding: 60px 40px;
-            border-radius: 6px;
+        /* Helps visibility for contenteditable areas */
+        [contenteditable]:hover {
+            outline: 1px dashed #0d6efd;
         }
-
-        /* HERO */
-
-        .hero {
-            text-align: center;
-            color: white;
-            background-size: cover;
-            background-position: center;
-        }
-
-        .hero h1 {
-            font-size: 48px;
-            margin: 0;
-        }
-
-        .hero p {
-            font-size: 20px;
-        }
-
-        /* Cards */
-
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-        }
-
-        .card {
-            background: #fafafa;
-            padding: 20px;
-            border-radius: 6px;
-            text-align: center;
-        }
-
-        /* CTA */
-
-        .cta {
-            text-align: center;
-            background: #111;
-            color: white;
-        }
-
-        /* Footer */
-
-        .footer {
-            background: #222;
-            color: white;
-            text-align: center;
-            font-size: 14px;
-        }
-
-        /* editable */
-
-        [contenteditable] {
-            outline: none;
-            cursor: text;
-        }
-
-        img {
-            max-width: 100%;
+        [contenteditable]:focus {
+            outline: 2px solid #0d6efd;
         }
     </style>
 </head>
 
 <body>
 
-    <div id="sidebar">
+    <div id="sidebar" class="d-flex flex-column shadow">
+        <h4 class="mb-4">Builder</h4>
+        
+        <div class="d-grid gap-2 mb-4">
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addHero()">+ Hero Section</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addCards()">+ Feature Cards</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addGallery()">+ Image Gallery</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addCTA()">+ Call to Action</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addFooter()">+ Footer</button>
+        </div>
 
-        <h3>Add Section</h3>
-
-        <button onclick="addHero()">Hero</button>
-        <button onclick="addCards()">Cards</button>
-        <button onclick="addGallery()">Gallery</button>
-        <button onclick="addCTA()">CTA</button>
-        <button onclick="addFooter()">Footer</button>
-
-        <hr>
-
-        <button onclick="exportPage()">Export HTML</button>
-
+        <hr class="mt-auto">
+        
+        <button class="btn btn-primary w-100" onclick="exportPage()">Export HTML</button>
+        <button class="btn btn-link btn-sm text-secondary mt-2" onclick="document.getElementById('canvas').innerHTML = ''">Clear Canvas</button>
     </div>
 
-    <div id="canvas"></div>
+    <div id="canvas" class="p-0">
+        </div>
 
     <script>
-
-        /* HERO */
+        const canvas = document.getElementById('canvas');
 
         function addHero() {
-
-            const hero = `
-<section class="section hero" style="background-image:url('https://picsum.photos/1200/600');">
-
-<h1 contenteditable="true">Your Product</h1>
-
-<p contenteditable="true">Build something amazing</p>
-
-<button>Get Started</button>
-
-</section>
-`
-
-            canvas.insertAdjacentHTML("beforeend", hero)
-
+            const html = `
+            <section class="py-5 text-center text-white bg-dark border-bottom" style="background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://picsum.photos/1200/600'); background-size: cover; background-position: center;">
+                <div class="container py-5">
+                    <h1 class="display-4 fw-bold" contenteditable="true">Modern Solutions</h1>
+                    <p class="lead mb-4" contenteditable="true">We build products that scale with your business and delight your users.</p>
+                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                        <button type="button" class="btn btn-primary btn-lg px-4 gap-3">Get Started</button>
+                        <button type="button" class="btn btn-outline-light btn-lg px-4">Learn More</button>
+                    </div>
+                </div>
+            </section>`;
+            canvas.insertAdjacentHTML("beforeend", html);
         }
-
-        /* CARDS */
 
         function addCards() {
-
-            const cards = `
-<section class="section">
-
-<h2 contenteditable="true">Features</h2>
-
-<div class="cards">
-
-<div class="card">
-<h3 contenteditable="true">Fast</h3>
-<p contenteditable="true">Super fast performance</p>
-</div>
-
-<div class="card">
-<h3 contenteditable="true">Secure</h3>
-<p contenteditable="true">Security first design</p>
-</div>
-
-<div class="card">
-<h3 contenteditable="true">Simple</h3>
-<p contenteditable="true">Easy to use</p>
-</div>
-
-</div>
-
-</section>
-`
-
-            canvas.insertAdjacentHTML("beforeend", cards)
-
+            const html = `
+            <section class="py-5 bg-light">
+                <div class="container">
+                    <h2 class="text-center mb-5" contenteditable="true">Why Choose Us</h2>
+                    <div class="row g-4 text-center">
+                        <div class="col-md-4">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <div class="card-body p-4">
+                                    <h5 class="card-title fw-bold" contenteditable="true">Lightning Fast</h5>
+                                    <p class="card-text text-muted" contenteditable="true">Optimized performance for the best user experience.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <div class="card-body p-4">
+                                    <h5 class="card-title fw-bold" contenteditable="true">Secure by Default</h5>
+                                    <p class="card-text text-muted" contenteditable="true">Your data is protected with industry-standard encryption.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <div class="card-body p-4">
+                                    <h5 class="card-title fw-bold" contenteditable="true">Fully Responsive</h5>
+                                    <p class="card-text text-muted" contenteditable="true">Works perfectly on desktop, tablet, and mobile.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>`;
+            canvas.insertAdjacentHTML("beforeend", html);
         }
-
-        /* GALLERY */
 
         function addGallery() {
-
-            const gallery = `
-<section class="section">
-
-<h2 contenteditable="true">Gallery</h2>
-
-<div class="cards">
-
-<img src="https://picsum.photos/300?1">
-<img src="https://picsum.photos/300?2">
-<img src="https://picsum.photos/300?3">
-
-</div>
-
-</section>
-`
-
-            canvas.insertAdjacentHTML("beforeend", gallery)
-
+            const html = `
+            <section class="py-5">
+                <div class="container">
+                    <h2 class="text-center mb-4" contenteditable="true">Our Work</h2>
+                    <div class="row g-3">
+                        <div class="col-sm-6 col-lg-4"><img src="https://picsum.photos/600/400?1" class="img-fluid rounded shadow-sm"></div>
+                        <div class="col-sm-6 col-lg-4"><img src="https://picsum.photos/600/400?2" class="img-fluid rounded shadow-sm"></div>
+                        <div class="col-sm-6 col-lg-4"><img src="https://picsum.photos/600/400?3" class="img-fluid rounded shadow-sm"></div>
+                    </div>
+                </div>
+            </section>`;
+            canvas.insertAdjacentHTML("beforeend", html);
         }
-
-        /* CTA */
 
         function addCTA() {
-
-            const cta = `
-<section class="section cta">
-
-<h2 contenteditable="true">Ready to start?</h2>
-
-<p contenteditable="true">Join thousands of users</p>
-
-<button>Sign Up</button>
-
-</section>
-`
-
-            canvas.insertAdjacentHTML("beforeend", cta)
-
+            const html = `
+            <section class="py-5 bg-primary text-white text-center">
+                <div class="container py-3">
+                    <h2 class="fw-bold" contenteditable="true">Ready to take the next step?</h2>
+                    <p class="mb-4 opacity-75" contenteditable="true">Join over 10,000 teams using our platform today.</p>
+                    <button class="btn btn-light btn-lg px-5 rounded-pill shadow">Sign Up Now</button>
+                </div>
+            </section>`;
+            canvas.insertAdjacentHTML("beforeend", html);
         }
-
-        /* FOOTER */
 
         function addFooter() {
-
-            const footer = `
-<footer class="section footer">
-
-<p contenteditable="true">© 2026 Your Company</p>
-
-</footer>
-`
-
-            canvas.insertAdjacentHTML("beforeend", footer)
-
+            const html = `
+            <footer class="py-4 bg-dark text-white border-top">
+                <div class="container text-center">
+                    <p class="mb-0 small" contenteditable="true">© 2026 Your Brand. All rights reserved.</p>
+                </div>
+            </footer>`;
+            canvas.insertAdjacentHTML("beforeend", html);
         }
-
-        /* EXPORT */
 
         function exportPage() {
+            let innerContent = canvas.innerHTML;
+            innerContent = innerContent.replace(/contenteditable="true"/g, "");
 
-            let html = document.getElementById("canvas").innerHTML
-
-            // Remove editing attributes
-            html = html.replace(/contenteditable="true"/g, "")
-
-            // Full page template
-            const page = `
+            const fullPage = `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Exported Page</title>
-
-<style>
-body{margin:0;font-family:sans-serif}
-
-.section{padding:60px 40px}
-
-.hero{
-color:white;
-text-align:center;
-background-size:cover;
-background-position:center
-}
-
-.cards{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:20px
-}
-
-.card{
-background:#fafafa;
-padding:20px
-}
-
-.cta{
-text-align:center;
-background:#111;
-color:white
-}
-
-.footer{
-text-align:center;
-background:#222;
-color:white
-}
-
-img{
-max-width:100%
-}
-
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exported Project</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>body { font-family: system-ui, -apple-system, sans-serif; }</style>
 </head>
-
 <body>
-
-${html}
-
+    ${innerContent}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"><\/script>
 </body>
-</html>
-`
+</html>`;
 
-            // Create downloadable file
-            const blob = new Blob([page], { type: "text/html" })
-            const link = document.createElement("a")
-
-            link.href = URL.createObjectURL(blob)
-            link.download = "index.html"
-
-            document.body.appendChild(link)
-            link.click()
-
-            document.body.removeChild(link)
-
-        }
-
-        function downloadFile(filename, content) {
-
-            const blob = new Blob([content], { type: "text/html" })
-
-            const a = document.createElement("a")
-
-            a.href = URL.createObjectURL(blob)
-            a.download = filename
-
-            a.click()
-
+            const blob = new Blob([fullPage], { type: "text/html" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "landing-page.html";
+            link.click();
         }
     </script>
 
 </body>
-
 </html>
