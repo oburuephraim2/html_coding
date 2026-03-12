@@ -23,7 +23,6 @@
         .section-wrapper:hover > .section-toolbar { display: flex; }
         [contenteditable]:focus { outline: 2px solid #0d6efd; background: transparent !important;border-radius: 4px; }
         
-
         .inspector-label { font-size: 0.75rem; font-weight: bold; color: #6c757d; text-transform: uppercase; margin-top: 15px; display: block; }
     </style>
 </head>
@@ -62,14 +61,22 @@
     <label class="inspector-label">Vertical Padding</label>
     <input type="range" class="form-range" min="0" max="5" step="1" id="paddingRange" oninput="updatePadding(this.value)">
 
-    <!-- Updated Image Tools -->
-    <div id="image-tools" style="display:none;">
-        <label class="inspector-label">Gallery Actions</label>
+    <!-- Reusable Elements - Systematic approach for ANY section -->
+    <label class="inspector-label">Add Elements (reusable)</label>
+    <div class="d-grid gap-2">
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addElement('heading')">+ Heading</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addElement('paragraph')">+ Paragraph</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addElement('image')">+ Image</button>
+    </div>
+
+    <!-- Image Tools (now general + gallery-specific) -->
+    <div id="image-tools">
+        <label class="inspector-label">Image Tools</label>
         <button class="btn btn-sm btn-outline-primary w-100 mb-3" id="addPhotoBtn" onclick="addPhoto()">+ Add Photo to Gallery</button>
         
-        <label class="inspector-label">Image/BG URL</label>
+        <label class="inspector-label">Image / BG URL</label>
         <input type="text" class="form-control form-control-sm" id="imgUrl" placeholder="https://..." oninput="updateImage(this.value)">
-        <small class="text-muted" style="font-size: 0.7rem;">Tip: Click a gallery image to edit it specifically.</small>
+        <small class="text-muted" style="font-size: 0.7rem;">Tip: Click any image to edit it specifically.</small>
     </div>
 
     <div id="card-tools" style="display:none;">
@@ -83,11 +90,10 @@
         const canvas = document.getElementById('canvas');
         const inspector = document.getElementById('inspector');
         let activeWrapper = null;
-        let selectedImgElement = null; // Track specific image clicked in a gallery
+        let selectedImgElement = null;
 
         const templates = {
-    // 1. Updated Hero: Added /1200/800 so it loads by default & removed bg-dark/text-white classes to fix editing conflicts
-    hero: `<section class="py-5 text-center" style="background-color: #343a40; color: #ffffff; background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://picsum.photos'); background-size: cover; background-position: center;">
+    hero: `<section class="py-5 text-center" style="background-color: #343a40; color: #ffffff; background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://picsum.photos/id/1015/1200/800'); background-size: cover; background-position: center;">
         <div class="container py-5">
             <h1 class="display-4 fw-bold" contenteditable="true">Modern Design</h1>
             <p class="lead" contenteditable="true">Click here to edit text directly over the background image.</p>
@@ -109,12 +115,22 @@
         </div>
     </section>`,
 
-    // 2. Updated Gallery: Added 'gallery-row' class so our JS knows where to append new photos
+    // Enhanced Gallery: now includes responsive grid inside each item
+    // → Text appears BESIDE image on desktop (md+), BELOW on mobile
+    // → Reusable grid pattern you can copy to other sections if needed
     gallery: `<section class="py-5" style="background-color: #ffffff;">
         <div class="container">
             <div class="row g-3 justify-content-center gallery-row">
-                <div class="col-6 col-md-4 gallery-item text-center">
-                    <img src="https://picsum.photos" class="img-fluid rounded shadow-sm clickable-img" style="cursor:pointer;" onclick="selectImage(this, event)">
+                <div class="col-12 col-md-6 gallery-item">
+                    <div class="row align-items-center g-3">
+                        <div class="col-md-5">
+                            <img src="https://picsum.photos/id/1015/600/400" class="img-fluid rounded shadow-sm clickable-img" style="cursor:pointer;" onclick="selectImage(this, event)">
+                        </div>
+                        <div class="col-md-7">
+                            <h5 contenteditable="true">Gallery Image</h5>
+                            <p contenteditable="true" class="text-muted mb-0">Beautiful photo with description. Text sits beside image on desktop, stacks below on mobile (responsive grid).</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -162,35 +178,69 @@
             document.getElementById('bgColor').value = rgbToHex(styles.backgroundColor);
             document.getElementById('textColor').value = rgbToHex(styles.color);
             
-            document.getElementById('image-tools').style.display = (['hero', 'gallery'].includes(wrapper.dataset.type)) ? 'block' : 'none';
+            // Image tools now always available (general + gallery-specific)
+            document.getElementById('image-tools').style.display = 'block';
+            document.getElementById('addPhotoBtn').style.display = (wrapper.dataset.type === 'gallery') ? 'block' : 'none';
             document.getElementById('card-tools').style.display = (wrapper.dataset.type === 'cards') ? 'block' : 'none';
             
-            // If gallery, reset selected image focus
             selectedImgElement = null;
         }
 
-        // --- NEW GALLERY FUNCTIONS ---
         function selectImage(img, e) {
             e.stopPropagation();
             selectedImgElement = img;
-            // Visual feedback
             document.querySelectorAll('.clickable-img').forEach(i => i.style.outline = "none");
             img.style.outline = "3px solid #0d6efd";
-            // Update input field in inspector
             document.getElementById('imgUrl').value = img.src;
         }
 
+        // --- Enhanced Gallery (with grid) ---
         function addPhoto() {
             if(activeWrapper && activeWrapper.dataset.type === 'gallery') {
                 const row = activeWrapper.querySelector('.gallery-row');
                 const col = document.createElement('div');
-                col.className = 'col-6 col-md-4 gallery-item text-center';
-                const sig = Math.floor(Math.random() * 1000);
-                col.innerHTML = `<img src="https://picsum.photos{sig}" class="img-fluid rounded shadow-sm clickable-img" style="cursor:pointer;" onclick="selectImage(this, event)">`;
+                col.className = 'col-12 col-md-6 gallery-item';
+                const sig = Math.floor(Math.random() * 900) + 100;
+                col.innerHTML = `
+                    <div class="row align-items-center g-3">
+                        <div class="col-md-5">
+                            <img src="https://picsum.photos/id/${sig}/600/400" class="img-fluid rounded shadow-sm clickable-img" style="cursor:pointer;" onclick="selectImage(this, event)">
+                        </div>
+                        <div class="col-md-7">
+                            <h5 contenteditable="true">New Gallery Image</h5>
+                            <p contenteditable="true" class="text-muted mb-0">Add your caption or description here.</p>
+                        </div>
+                    </div>
+                `;
                 row.appendChild(col);
             }
         }
-        // --- END GALLERY FUNCTIONS ---
+        // --- END Gallery ---
+
+        // Reusable element adder (systematic approach for all sections)
+        function addElement(type) {
+            if (!activeWrapper) return;
+            const container = activeWrapper.querySelector('.container') || activeWrapper.querySelector('section, footer');
+            if (!container) return;
+
+            let html = '';
+            switch(type) {
+                case 'heading':
+                    html = `<h3 contenteditable="true" class="mb-4">New Heading</h3>`;
+                    break;
+                case 'paragraph':
+                    html = `<p contenteditable="true" class="mb-4">New paragraph text. Click to edit.</p>`;
+                    break;
+                case 'image':
+                    const id = Math.floor(Math.random() * 200) + 10;
+                    html = `<img src="https://picsum.photos/id/${id}/800/500" class="img-fluid rounded shadow-sm my-3 clickable-img" style="cursor:pointer;" onclick="selectImage(this, event)">`;
+                    break;
+            }
+
+            const temp = document.createElement('div');
+            temp.innerHTML = html;
+            container.appendChild(temp.firstElementChild);
+        }
 
         function updateStyle(prop, val) {
             if(!activeWrapper) return;
@@ -205,22 +255,22 @@
             el.className = el.className.replace(/py-\d/, 'py-' + val);
         }
 
+        // Updated image logic: works for ANY image (general or gallery) + hero BG fallback
         function updateImage(url) {
             if(!activeWrapper) return;
-            const section = activeWrapper.querySelector('section');
             
-            // Hero background logic
+            if(selectedImgElement) {
+                selectedImgElement.src = url;
+                return;
+            }
+            
+            const section = activeWrapper.querySelector('section');
             if(activeWrapper.dataset.type === 'hero') {
                 section.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('${url}')`;
             } 
-            // Gallery specific image logic
             else if(activeWrapper.dataset.type === 'gallery') {
-                if(selectedImgElement) {
-                    selectedImgElement.src = url;
-                } else {
-                    const firstImg = activeWrapper.querySelector('img');
-                    if(firstImg) firstImg.src = url;
-                }
+                const firstImg = activeWrapper.querySelector('img');
+                if(firstImg) firstImg.src = url;
             }
         }
 
