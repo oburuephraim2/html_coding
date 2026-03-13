@@ -63,6 +63,34 @@
     <label class="inspector-label">Vertical Padding</label>
     <input type="range" class="form-range" min="0" max="5" step="1" id="paddingRange" oninput="updatePadding(this.value)">
 
+    <div id="heroSettingsContainer" style="display: none;">
+        <label class="inspector-label">Hero Background Image URL</label>
+        <input type="text" class="form-control form-control-sm" id="heroBackgroundUrl" placeholder="https://example.com/image.jpg" oninput="updateHeroBackgroundImage(this.value)">
+    </div>
+
+    <div id="formSettingsContainer" style="display: none;">
+        <label class="inspector-label">Form Settings</label>
+        <div class="mb-2">
+            <label for="formMethod" class="form-label small">Method</label>
+            <select class="form-control form-control-sm" id="formMethod" onchange="updateFormAttribute('method', this.value)">
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+            </select>
+        </div>
+        <div class="mb-2">
+            <label for="formAction" class="form-label small">Action URL</label>
+            <input type="text" class="form-control form-control-sm" id="formAction" placeholder="/submit" oninput="updateFormAttribute('action', this.value)">
+        </div>
+        <div class="mb-2">
+            <label for="formEnctype" class="form-label small">Encoding Type</label>
+            <select class="form-control form-control-sm" id="formEnctype" onchange="updateFormAttribute('enctype', this.value)">
+                <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+                <option value="multipart/form-data">multipart/form-data</option>
+                <option value="text/plain">text/plain</option>
+            </select>
+        </div>
+    </div>
+
     <label class="inspector-label">Section Actions</label>
     <div class="d-grid gap-2 mb-3">
         <button class="btn btn-info btn-sm w-100" onclick="moveSection('up')">↑ Move Up</button>
@@ -134,6 +162,29 @@
         <button class="btn btn-danger btn-sm w-100 mt-2" onclick="deleteSelectedElement()">Delete Element</button>
     </div>
 
+    <div id="form-settings-properties" style="display: none;">
+        <label class="inspector-label">Form Settings</label>
+        <div class="mb-2">
+            <label for="sectionFormMethod" class="form-label small">Method</label>
+            <select class="form-control form-control-sm" id="sectionFormMethod" onchange="updateFormAttribute('method', this.value)">
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+            </select>
+        </div>
+        <div class="mb-2">
+            <label for="sectionFormAction" class="form-label small">Action URL</label>
+            <input type="text" class="form-control form-control-sm" id="sectionFormAction" placeholder="/submit" oninput="updateFormAttribute('action', this.value)">
+        </div>
+        <div class="mb-2">
+            <label for="sectionFormEnctype" class="form-label small">Encoding Type</label>
+            <select class="form-control form-control-sm" id="sectionFormEnctype" onchange="updateFormAttribute('enctype', this.value)">
+                <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+                <option value="multipart/form-data">multipart/form-data</option>
+                <option value="text/plain">text/plain</option>
+            </select>
+        </div>
+    </div>
+
     <div id="form-element-properties" style="display: none;">
         <label class="inspector-label">Form Element Properties</label>
         <div class="mb-2">
@@ -175,7 +226,14 @@
     const canvas = document.getElementById('canvas');
     const inspector = document.getElementById('inspector');
     let activeWrapper = null;
-    let selectedElement = null; // To track a selected element within a section
+    let selectedElement = null;
+
+    // Cached DOM references for performance
+    const elementInspectorDiv = document.getElementById('element-inspector');
+    const formElementPropertiesDiv = document.getElementById('form-element-properties');
+    const formElementCreator = document.getElementById('form-element-creator');
+    const cardButton = document.getElementById('cardButton');
+    const galleryItemButton = document.getElementById('galleryItemButton');
 
     const templates = {
         generic: `<section class="py-3 text-center bg-light" style="color: #000000;">
@@ -252,7 +310,7 @@
             <div class="container">
                 <h2 contenteditable="true">Ready to get started?</h2>
                 <p class="lead" contenteditable="true">Join us today and experience the difference.</p>
-                <button class="btn btn-light mt-3" contenteditable="true">Sign Up Now</button>
+                <button class="btn btn-light mt-3">Sign Up Now</button>
             </div>
         </section>`,
         testimonials: `<section class="py-5 bg-light">
@@ -323,7 +381,7 @@
                                     <li contenteditable="true">✓ Feature 2</li>
                                     <li contenteditable="true">✓ Feature 3</li>
                                 </ul>
-                                <button class="btn btn-primary w-100 mt-3" contenteditable="true">Get Started</button>
+                                <button class="btn btn-primary w-100 mt-3">Get Started</button>
                             </div>
                         </div>
                     </div>
@@ -338,7 +396,7 @@
                                     <li contenteditable="true">✓ Feature 2</li>
                                     <li contenteditable="true">✓ Feature 3</li>
                                 </ul>
-                                <button class="btn btn-primary w-100 mt-3" contenteditable="true">Get Started</button>
+                                <button class="btn btn-primary w-100 mt-3">Get Started</button>
                             </div>
                         </div>
                     </div>
@@ -353,7 +411,7 @@
                                     <li contenteditable="true">✓ Feature 2</li>
                                     <li contenteditable="true">✓ Feature 3</li>
                                 </ul>
-                                <button class="btn btn-primary w-100 mt-3" contenteditable="true">Get Started</button>
+                                <button class="btn btn-primary w-100 mt-3">Get Started</button>
                             </div>
                         </div>
                     </div>
@@ -363,21 +421,7 @@
         form: `<section class="py-5 bg-light">
             <div class="container">
                 <h2 class="text-center mb-4" contenteditable="true">Contact Us</h2>
-                <form>
-                    <div class="mb-3">
-                        <label for="nameInput" class="form-label" contenteditable="true">Name</label>
-                        <input type="text" class="form-control" id="nameInput" placeholder="Your Name">
-                    </div>
-                    <div class="mb-3">
-                        <label for="emailInput" class="form-label" contenteditable="true">Email address</label>
-                        <input type="email" class="form-control" id="emailInput" placeholder="name@example.com">
-                    </div>
-                    <div class="mb-3">
-                        <label for="messageTextarea" class="form-label" contenteditable="true">Message</label>
-                        <textarea class="form-control" id="messageTextarea" rows="3" placeholder="Your message"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary" contenteditable="true">Submit</button>
-                </form>
+                <form></form>
             </div>
         </section>`,
         footer: `<footer class="py-4 bg-dark text-white text-center">
@@ -392,21 +436,23 @@
         localStorage.setItem('simplifiedBuilderState', canvas.innerHTML);
     }
 
+    function attachClickHandlers(wrapper) {
+        wrapper.onclick = (e) => handleWrapperClick(e, wrapper);
+        wrapper.querySelectorAll('[contenteditable]').forEach(el => {
+            el.onblur = saveState;
+        });
+        wrapper.querySelectorAll('*').forEach(el => {
+            if (!el.classList.contains('section-wrapper') && el.tagName !== 'SECTION' && el.tagName !== 'DIV' && el !== wrapper && el.parentElement !== wrapper) {
+                el.onclick = (e) => { e.stopPropagation(); selectElement(el); };
+            }
+        });
+    }
+
     function loadLocalState() {
         const savedState = localStorage.getItem('simplifiedBuilderState');
         if (savedState) {
             canvas.innerHTML = savedState;
-            // Re-attach click handlers for existing elements after loading
-            canvas.querySelectorAll('.section-wrapper').forEach(wrapper => {
-                wrapper.onclick = (e) => handleWrapperClick(e, wrapper);
-                // Ensure all elements within sections are clickable for selection
-                wrapper.querySelectorAll('*').forEach(el => {
-                    // Exclude the section-wrapper itself and direct children like 'section' or 'div.container' from being selected as 'elements'
-                    if (!el.classList.contains('section-wrapper') && !el.closest('.section-wrapper').classList.contains('active') && el.tagName !== 'SECTION' && el.tagName !== 'DIV' && el !== wrapper && el.parentElement !== wrapper) {
-                        el.onclick = (e) => { e.stopPropagation(); selectElement(el); };
-                    }
-                });
-            });
+            canvas.querySelectorAll('.section-wrapper').forEach(attachClickHandlers);
         }
     }
     window.onload = loadLocalState;
@@ -430,23 +476,9 @@
         wrapper.dataset.type = type;
         wrapper.innerHTML = `\n            ${templates[type]}`;
 
-        wrapper.onclick = (e) => handleWrapperClick(e, wrapper);
         canvas.appendChild(wrapper);
+        attachClickHandlers(wrapper);
         saveState();
-
-        // After adding, ensure contenteditable elements have their onblur handler for saving
-        wrapper.querySelectorAll('[contenteditable]').forEach(el => {
-            el.onblur = saveState;
-        });
-        // Make newly added elements clickable for selection
-        wrapper.querySelectorAll('*').forEach(el => {
-            // Exclude the section-wrapper itself and direct children like 'section' or 'div.container' from being selected as 'elements'
-            if (!el.classList.contains('section-wrapper') && el.tagName !== 'SECTION' && el.tagName !== 'DIV' && el !== wrapper && el.parentElement !== wrapper) {
-                el.onclick = (e) => { e.stopPropagation(); selectElement(el); };
-            }
-        });
-
-        // Select the new section automatically
         selectSection(wrapper);
     }
 
@@ -460,39 +492,41 @@
         activeWrapper = wrapper;
         activeWrapper.classList.add('active');
         inspector.style.display = 'block';
-        document.getElementById('element-inspector').style.display = 'none'; // Hide element inspector
+        elementInspectorDiv.style.display = 'none';
+        formElementPropertiesDiv.style.display = 'none';
+        document.getElementById('form-settings-properties').style.display = 'none';
+        document.getElementById('heroSettingsContainer').style.display = 'none';
+        document.getElementById('formSettingsContainer').style.display = 'none';
 
-        const formElementCreator = document.getElementById('form-element-creator');
-        const formElementProperties = document.getElementById('form-element-properties');
-        const cardButton = document.getElementById('cardButton');
-        const galleryItemButton = document.getElementById('galleryItemButton');
-
-        if (wrapper.dataset.type === 'form') {
-            formElementCreator.style.display = 'block';
-            cardButton.style.display = 'none';
-            galleryItemButton.style.display = 'none';
-        } else if (wrapper.dataset.type === 'cards') {
-            formElementCreator.style.display = 'none';
-            cardButton.style.display = 'block';
-            galleryItemButton.style.display = 'none';
-        } else if (wrapper.dataset.type === 'gallery') {
-            formElementCreator.style.display = 'none';
-            cardButton.style.display = 'none';
-            galleryItemButton.style.display = 'block';
-        } else {
-            formElementCreator.style.display = 'none';
-            cardButton.style.display = 'none';
-            galleryItemButton.style.display = 'none';
+        // Show/hide section-specific controls based on type
+        const sectionType = wrapper.dataset.type;
+        formElementCreator.style.display = sectionType === 'form' ? 'block' : 'none';
+        cardButton.style.display = sectionType === 'cards' ? 'block' : 'none';
+        galleryItemButton.style.display = sectionType === 'gallery' ? 'block' : 'none';
+        
+        // Show hero background image controls for hero section
+        if (sectionType === 'hero') {
+            document.getElementById('heroSettingsContainer').style.display = 'block';
+            const target = wrapper.querySelector('section');
+            const bgImageMatch = target.style.backgroundImage.match(/url\('([^']+)'\)/);
+            document.getElementById('heroBackgroundUrl').value = bgImageMatch ? bgImageMatch[1] : '';
         }
-        formElementProperties.style.display = 'none'; // Hide by default until a form element is selected
+        
+        // Show form settings for form section
+        if (sectionType === 'form') {
+            document.getElementById('formSettingsContainer').style.display = 'block';
+            const form = wrapper.querySelector('form');
+            document.getElementById('formMethod').value = form.getAttribute('method') || 'GET';
+            document.getElementById('formAction').value = form.getAttribute('action') || '';
+            document.getElementById('formEnctype').value = form.getAttribute('enctype') || 'application/x-www-form-urlencoded';
+        }
 
         const target = wrapper.querySelector('section, footer');
         const styles = window.getComputedStyle(target);
         document.getElementById('bgColor').value = rgbToHex(styles.backgroundColor);
         document.getElementById('textColor').value = rgbToHex(styles.color);
-        // Set padding range if you implement that here
         const currentPadding = target.className.match(/py-(\d)/);
-        document.getElementById('paddingRange').value = currentPadding ? currentPadding[1] : 3; // Default to 3 if not found
+        document.getElementById('paddingRange').value = currentPadding ? currentPadding[1] : 3;
     }
 
     function selectElement(element) {
@@ -525,21 +559,19 @@
     function populateElementInspector() {
         const elementInspectorDiv = document.getElementById('element-inspector');
         const formElementPropertiesDiv = document.getElementById('form-element-properties');
+        const formSettingsPropertiesDiv = document.getElementById('form-settings-properties');
         
         if (!selectedElement) {
             elementInspectorDiv.style.display = 'none';
             formElementPropertiesDiv.style.display = 'none';
+            formSettingsPropertiesDiv.style.display = 'none';
             return;
         }
 
-        // Hide all form element property fields initially
+        // Hide section form settings and form element property fields initially
+        formSettingsPropertiesDiv.style.display = 'none';
         formElementPropertiesDiv.style.display = 'none';
-        document.getElementById('formElementName').parentElement.style.display = 'none';
-        document.getElementById('formElementPlaceholderContainer').style.display = 'none';
-        document.getElementById('formElementValueContainer').style.display = 'none';
-        document.getElementById('formElementForContainer').style.display = 'none';
-        document.getElementById('formElementTypeContainer').style.display = 'none';
-        document.getElementById('formElementCheckedContainer').style.display = 'none';
+        hideFormFieldContainers();
 
         // Hide/show text formatting controls
         const fontSizeContainer = document.getElementById('elementFontSizeContainer');
@@ -670,13 +702,56 @@
         }
     }
 
+    function removeBootstrapClasses(el, type) {
+        const classMap = {
+            bg: ['bg-dark', 'bg-light', 'bg-primary', 'bg-secondary', 'bg-white'],
+            text: ['text-white', 'text-dark', 'text-muted', 'text-black']
+        };
+        (classMap[type] || []).forEach(cls => el.classList.remove(cls));
+    }
+
+    function hideFormFieldContainers() {
+        const containerIds = ['formElementName', 'formElementPlaceholderContainer', 'formElementValueContainer', 'formElementForContainer', 'formElementTypeContainer', 'formElementCheckedContainer'];
+        containerIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+            else if (id === 'formElementName') document.getElementById('formElementName').parentElement.style.display = 'none';
+        });
+    }
+
     function updateStyle(prop, val) {
         if(!activeWrapper) return;
         const target = activeWrapper.querySelector('section, footer');
-        if(prop === 'backgroundColor') target.classList.remove('bg-dark', 'bg-light', 'bg-primary', 'bg-secondary', 'bg-white'); // Remove old Bootstrap BG classes
-        if(prop === 'color') target.classList.remove('text-white', 'text-dark', 'text-muted', 'text-black'); // Remove old Bootstrap text classes
+        if(prop === 'backgroundColor') removeBootstrapClasses(target, 'bg');
+        if(prop === 'color') removeBootstrapClasses(target, 'text');
         target.style[prop] = val;
         saveState();
+    }
+
+    function updateHeroBackgroundImage(url) {
+        if(!activeWrapper || activeWrapper.dataset.type !== 'hero') return;
+        const target = activeWrapper.querySelector('section');
+        // Parse existing gradient and replace image URL
+        const gradientMatch = target.style.backgroundImage.match(/(linear-gradient\([^,]+,[^)]+\)),\s*url\([^)]+\)/);
+        if (gradientMatch) {
+            target.style.backgroundImage = `${gradientMatch[1]}, url('${url}')`;
+        } else {
+            target.style.backgroundImage = `url('${url}')`;
+        }
+        saveState();
+    }
+
+    function updateFormAttribute(attributeName, value) {
+        if(!activeWrapper || activeWrapper.dataset.type !== 'form') return;
+        const form = activeWrapper.querySelector('form');
+        if (form) {
+            form.setAttribute(attributeName, value);
+            // Update the input fields to reflect changes
+            if (attributeName === 'method') document.getElementById('sectionFormMethod').value = value;
+            if (attributeName === 'action') document.getElementById('sectionFormAction').value = value;
+            if (attributeName === 'enctype') document.getElementById('sectionFormEnctype').value = value;
+            saveState();
+        }
     }
 
     function updatePadding(val) {
@@ -712,10 +787,10 @@
                 html = `<img src="https://picsum.photos/id/${id}/400/250" class="img-fluid rounded shadow-sm my-3" alt="New Image">`;
                 break;
             case 'button':
-                html = `<button class="btn btn-primary my-3" contenteditable="true">Call to Action</button>`;
+                html = `<button class="btn btn-primary my-3">Call to Action</button>`;
                 break;
             case 'link':
-                html = `<a href="#" class="d-block my-3" contenteditable="true">Clickable Link</a>`;
+                html = `<a href="#" class="d-block my-3">Clickable Link</a>`;
                 break;
             case 'card':
                 html = `<div class="col-md-4">
@@ -781,18 +856,7 @@
         if (!activeWrapper) return;
         const clone = activeWrapper.cloneNode(true);
         activeWrapper.parentNode.insertBefore(clone, activeWrapper.nextSibling);
-        
-        // Re-attach click handlers to cloned section
-        clone.onclick = (e) => handleWrapperClick(e, clone);
-        clone.querySelectorAll('[contenteditable]').forEach(el => {
-            el.onblur = saveState;
-        });
-        clone.querySelectorAll('*').forEach(el => {
-            if (!el.classList.contains('section-wrapper') && el.tagName !== 'SECTION' && el.tagName !== 'DIV' && el !== clone && el.parentElement !== clone) {
-                el.onclick = (e) => { e.stopPropagation(); selectElement(el); };
-            }
-        });
-        
+        attachClickHandlers(clone);
         saveState();
         selectSection(clone);
     }
@@ -872,7 +936,7 @@
                     </div>`;
                 break;
             case 'submit':
-                elementHtml = `<button type="submit" class="btn btn-primary my-3" contenteditable="true">Submit</button>`;
+                elementHtml = `<button type="submit" class="btn btn-primary my-3">Submit</button>`;
                 break;
             case 'label':
                  elementHtml = `<label for="" class="form-label my-2" contenteditable="true">New Label</label>`;
@@ -893,6 +957,9 @@
                     el.onclick = (e) => { e.stopPropagation(); selectElement(el); };
                     if (el.hasAttribute('contenteditable')) el.onblur = saveState;
                 });
+            } else if (newElement.tagName === 'BUTTON') {
+                 // For button elements, explicitly attach click handler
+                 newElement.onclick = (e) => { e.stopPropagation(); selectElement(newElement); };
             } else {
                  newElement.onclick = (e) => { e.stopPropagation(); selectElement(newElement); };
                  if (newElement.hasAttribute('contenteditable')) newElement.onblur = saveState;
