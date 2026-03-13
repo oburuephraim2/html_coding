@@ -32,8 +32,11 @@
             <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('hero')">+ Hero Section</button>
             <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('cards')">+ Feature Cards</button>
             <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('gallery')">+ Image Gallery</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('testimonials')">+ Testimonials</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('stats')">+ Stats Section</button>
             <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('cta')">+ Call to Action</button>
             <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('form')">+ Form</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('pricing')">+ Pricing Table</button>
             <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('footer')">+ Footer</button>
         </div>
         <hr>
@@ -62,6 +65,9 @@
 
     <label class="inspector-label">Section Actions</label>
     <div class="d-grid gap-2 mb-3">
+        <button class="btn btn-info btn-sm w-100" onclick="moveSection('up')">↑ Move Up</button>
+        <button class="btn btn-info btn-sm w-100" onclick="moveSection('down')">↓ Move Down</button>
+        <button class="btn btn-warning btn-sm w-100" onclick="duplicateSection()">⚡ Duplicate</button>
         <button class="btn btn-danger btn-sm w-100" onclick="deleteActiveSection()">Delete Section</button>
     </div>
 
@@ -73,6 +79,7 @@
         <button class="btn btn-sm btn-outline-secondary w-100" onclick="addElement('button')">+ Button</button>
         <button class="btn btn-sm btn-outline-secondary w-100" onclick="addElement('link')">+ Link</button>
         <button class="btn btn-sm btn-outline-secondary w-100" id="cardButton" style="display: none;" onclick="addElement('card')">+ Card</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" id="galleryItemButton" style="display: none;" onclick="addElement('gallery-item')">+ Gallery Item</button>
     </div>
 
     <div id="form-element-creator" style="display: none;">
@@ -111,6 +118,18 @@
         <div class="mb-2" id="elementTextContentContainer">
             <label for="elementTextContent" class="form-label small">Text Content</label>
             <textarea class="form-control form-control-sm" id="elementTextContent" oninput="updateElementText(this.value)"></textarea>
+        </div>
+        <div class="mb-2" id="elementFontSizeContainer">
+            <label for="elementFontSize" class="form-label small">Font Size</label>
+            <input type="number" class="form-control form-control-sm" id="elementFontSize" placeholder="px" oninput="updateElementStyle('fontSize', this.value + 'px')">
+        </div>
+        <div class="mb-2" id="elementTextAlignContainer">
+            <label class="form-label small">Text Align</label>
+            <div class="btn-group w-100" role="group">
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="updateElementStyle('textAlign', 'left')">L</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="updateElementStyle('textAlign', 'center')">C</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="updateElementStyle('textAlign', 'right')">R</button>
+            </div>
         </div>
         <button class="btn btn-danger btn-sm w-100 mt-2" onclick="deleteSelectedElement()">Delete Element</button>
     </div>
@@ -236,6 +255,111 @@
                 <button class="btn btn-light mt-3" contenteditable="true">Sign Up Now</button>
             </div>
         </section>`,
+        testimonials: `<section class="py-5 bg-light">
+            <div class="container">
+                <h2 class="text-center mb-5" contenteditable="true">What Our Clients Say</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <p class="card-text" contenteditable="true">"This product has been a game changer for our business. Highly recommended!"</p>
+                                <footer class="blockquote-footer" contenteditable="true">Client Name</footer>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <p class="card-text" contenteditable="true">"Exceptional service and support. Very professional team."</p>
+                                <footer class="blockquote-footer" contenteditable="true">Client Name</footer>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <p class="card-text" contenteditable="true">"Best investment we made this year. Great ROI!"</p>
+                                <footer class="blockquote-footer" contenteditable="true">Client Name</footer>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>`,
+        stats: `<section class="py-5 bg-primary text-white">
+            <div class="container">
+                <div class="row text-center g-4">
+                    <div class="col-md-3">
+                        <h3 class="display-6" contenteditable="true">100+</h3>
+                        <p contenteditable="true">Happy Clients</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h3 class="display-6" contenteditable="true">500+</h3>
+                        <p contenteditable="true">Projects Done</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h3 class="display-6" contenteditable="true">10+</h3>
+                        <p contenteditable="true">Years Experience</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h3 class="display-6" contenteditable="true">24/7</h3>
+                        <p contenteditable="true">Support</p>
+                    </div>
+                </div>
+            </div>
+        </section>`,
+        pricing: `<section class="py-5 bg-light">
+            <div class="container">
+                <h2 class="text-center mb-5" contenteditable="true">Our Pricing Plans</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <h5 contenteditable="true">Basic</h5>
+                                <h3 contenteditable="true">$29</h3>
+                                <p contenteditable="true">per month</p>
+                                <ul class="list-unstyled" style="text-align: left;">
+                                    <li contenteditable="true">✓ Feature 1</li>
+                                    <li contenteditable="true">✓ Feature 2</li>
+                                    <li contenteditable="true">✓ Feature 3</li>
+                                </ul>
+                                <button class="btn btn-primary w-100 mt-3" contenteditable="true">Get Started</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <h5 contenteditable="true">Professional</h5>
+                                <h3 contenteditable="true">$79</h3>
+                                <p contenteditable="true">per month</p>
+                                <ul class="list-unstyled" style="text-align: left;">
+                                    <li contenteditable="true">✓ Feature 1</li>
+                                    <li contenteditable="true">✓ Feature 2</li>
+                                    <li contenteditable="true">✓ Feature 3</li>
+                                </ul>
+                                <button class="btn btn-primary w-100 mt-3" contenteditable="true">Get Started</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <h5 contenteditable="true">Enterprise</h5>
+                                <h3 contenteditable="true">$199</h3>
+                                <p contenteditable="true">per month</p>
+                                <ul class="list-unstyled" style="text-align: left;">
+                                    <li contenteditable="true">✓ Feature 1</li>
+                                    <li contenteditable="true">✓ Feature 2</li>
+                                    <li contenteditable="true">✓ Feature 3</li>
+                                </ul>
+                                <button class="btn btn-primary w-100 mt-3" contenteditable="true">Get Started</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>`,
         form: `<section class="py-5 bg-light">
             <div class="container">
                 <h2 class="text-center mb-4" contenteditable="true">Contact Us</h2>
@@ -341,16 +465,24 @@
         const formElementCreator = document.getElementById('form-element-creator');
         const formElementProperties = document.getElementById('form-element-properties');
         const cardButton = document.getElementById('cardButton');
+        const galleryItemButton = document.getElementById('galleryItemButton');
 
         if (wrapper.dataset.type === 'form') {
             formElementCreator.style.display = 'block';
             cardButton.style.display = 'none';
+            galleryItemButton.style.display = 'none';
         } else if (wrapper.dataset.type === 'cards') {
             formElementCreator.style.display = 'none';
             cardButton.style.display = 'block';
+            galleryItemButton.style.display = 'none';
+        } else if (wrapper.dataset.type === 'gallery') {
+            formElementCreator.style.display = 'none';
+            cardButton.style.display = 'none';
+            galleryItemButton.style.display = 'block';
         } else {
             formElementCreator.style.display = 'none';
             cardButton.style.display = 'none';
+            galleryItemButton.style.display = 'none';
         }
         formElementProperties.style.display = 'none'; // Hide by default until a form element is selected
 
@@ -408,6 +540,20 @@
         document.getElementById('formElementForContainer').style.display = 'none';
         document.getElementById('formElementTypeContainer').style.display = 'none';
         document.getElementById('formElementCheckedContainer').style.display = 'none';
+
+        // Hide/show text formatting controls
+        const fontSizeContainer = document.getElementById('elementFontSizeContainer');
+        const textAlignContainer = document.getElementById('elementTextAlignContainer');
+        const isTextElement = ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'P', 'SPAN', 'DIV', 'LABEL', 'BUTTON'].includes(selectedElement.tagName);
+        
+        fontSizeContainer.style.display = isTextElement ? 'block' : 'none';
+        textAlignContainer.style.display = isTextElement ? 'block' : 'none';
+        
+        if (isTextElement) {
+            const computedStyle = window.getComputedStyle(selectedElement);
+            const fontSize = computedStyle.fontSize.replace('px', '');
+            document.getElementById('elementFontSize').value = fontSize;
+        }
 
         // General element properties
         document.getElementById('elementId').value = selectedElement.id;
@@ -517,6 +663,13 @@
         }
     }
 
+    function updateElementStyle(prop, val) {
+        if (selectedElement) {
+            selectedElement.style[prop] = val;
+            saveState();
+        }
+    }
+
     function updateStyle(prop, val) {
         if(!activeWrapper) return;
         const target = activeWrapper.querySelector('section, footer');
@@ -536,9 +689,11 @@
         if (!activeWrapper) return;
         
         let container;
-        // Special handling for cards
+        // Special handling for cards and gallery items
         if (type === 'card' && activeWrapper.dataset.type === 'cards') {
             container = activeWrapper.querySelector('.row');
+        } else if (type === 'gallery-item' && activeWrapper.dataset.type === 'gallery') {
+            container = activeWrapper.querySelector('.gallery-row');
         } else {
             container = activeWrapper.querySelector('.container') || activeWrapper.querySelector('section, footer');
         }
@@ -572,6 +727,19 @@
                     </div>
                 </div>`;
                 break;
+            case 'gallery-item':
+                html = `<div class="col-12 col-md-6 gallery-item">
+                    <div class="row align-items-center g-3">
+                        <div class="col-md-5">
+                            <img src="https://picsum.photos/id/${Math.floor(Math.random() * 200) + 10}/600/400" class="img-fluid rounded shadow-sm clickable-img" style="cursor:pointer;" onclick="selectElement(this, event)">
+                        </div>
+                        <div class="col-md-7">
+                            <h5 contenteditable="true">Gallery Image</h5>
+                            <p contenteditable="true" class="text-muted mb-0">Beautiful photo with description.</p>
+                        </div>
+                    </div>
+                </div>`;
+                break;
             // Add other basic elements here if needed
         }
 
@@ -596,6 +764,37 @@
             closeInspector();
             saveState();
         }
+    }
+
+    function moveSection(direction) {
+        if (!activeWrapper) return;
+        const wrapper = activeWrapper;
+        if (direction === 'up' && wrapper.previousElementSibling) {
+            wrapper.parentNode.insertBefore(wrapper, wrapper.previousElementSibling);
+        } else if (direction === 'down' && wrapper.nextElementSibling) {
+            wrapper.parentNode.insertBefore(wrapper.nextElementSibling, wrapper);
+        }
+        saveState();
+    }
+
+    function duplicateSection() {
+        if (!activeWrapper) return;
+        const clone = activeWrapper.cloneNode(true);
+        activeWrapper.parentNode.insertBefore(clone, activeWrapper.nextSibling);
+        
+        // Re-attach click handlers to cloned section
+        clone.onclick = (e) => handleWrapperClick(e, clone);
+        clone.querySelectorAll('[contenteditable]').forEach(el => {
+            el.onblur = saveState;
+        });
+        clone.querySelectorAll('*').forEach(el => {
+            if (!el.classList.contains('section-wrapper') && el.tagName !== 'SECTION' && el.tagName !== 'DIV' && el !== clone && el.parentElement !== clone) {
+                el.onclick = (e) => { e.stopPropagation(); selectElement(el); };
+            }
+        });
+        
+        saveState();
+        selectSection(clone);
     }
 
     function deleteSelectedElement() {
