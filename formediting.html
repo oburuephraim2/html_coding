@@ -108,6 +108,9 @@
         <button class="btn btn-sm btn-outline-secondary w-100" onclick="addElement('link')">+ Link</button>
         <button class="btn btn-sm btn-outline-secondary w-100" id="cardButton" style="display: none;" onclick="addElement('card')">+ Card</button>
         <button class="btn btn-sm btn-outline-secondary w-100" id="galleryItemButton" style="display: none;" onclick="addElement('gallery-item')">+ Gallery Item</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" id="pricingCardButton" style="display: none;" onclick="addPricingCard()">+ Pricing Card</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" id="testimonialCardButton" style="display: none;" onclick="addTestimonialCard()">+ Testimonial Card</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" id="statItemButton" style="display: none;" onclick="addStatItem()">+ Stat Item</button>
     </div>
 
     <div id="form-element-creator" style="display: none;">
@@ -234,6 +237,9 @@
     const formElementCreator = document.getElementById('form-element-creator');
     const cardButton = document.getElementById('cardButton');
     const galleryItemButton = document.getElementById('galleryItemButton');
+    const pricingCardButton = document.getElementById('pricingCardButton');
+    const testimonialCardButton = document.getElementById('testimonialCardButton');
+    const statItemButton = document.getElementById('statItemButton');
 
     const templates = {
         generic: `<section class="py-3 text-center bg-light" style="color: #000000;">
@@ -503,6 +509,9 @@
         formElementCreator.style.display = sectionType === 'form' ? 'block' : 'none';
         cardButton.style.display = sectionType === 'cards' ? 'block' : 'none';
         galleryItemButton.style.display = sectionType === 'gallery' ? 'block' : 'none';
+        pricingCardButton.style.display = sectionType === 'pricing' ? 'block' : 'none';
+        testimonialCardButton.style.display = sectionType === 'testimonials' ? 'block' : 'none';
+        statItemButton.style.display = sectionType === 'stats' ? 'block' : 'none';
         
         // Show hero background image controls for hero section
         if (sectionType === 'hero') {
@@ -831,6 +840,101 @@
 
         saveState();
         selectElement(newElement); // Select the newly added element
+    }
+
+    function addPricingCard() {
+        if (!activeWrapper || activeWrapper.dataset.type !== 'pricing') return;
+        const container = activeWrapper.querySelector('.row');
+        if (!container) return;
+
+        const html = `<div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <h5 contenteditable="true">Plan Name</h5>
+                    <h3 contenteditable="true">$99</h3>
+                    <p contenteditable="true">per month</p>
+                    <ul class="list-unstyled" style="text-align: left;">
+                        <li contenteditable="true">✓ Feature 1</li>
+                        <li contenteditable="true">✓ Feature 2</li>
+                    </ul>
+                    <button class="btn btn-primary w-100 mt-3">Get Started</button>
+                </div>
+            </div>
+        </div>`;
+
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+        const newElement = temp.firstElementChild;
+        container.appendChild(newElement);
+
+        // Make newly added card clickable and its elements selectable
+        newElement.querySelectorAll('*').forEach(el => {
+            if (!el.classList.contains('card') && el.tagName !== 'DIV') {
+                el.onclick = (e) => { e.stopPropagation(); selectElement(el); };
+            }
+        });
+        newElement.onclick = (e) => { e.stopPropagation(); selectElement(newElement); };
+
+        saveState();
+        selectElement(newElement);
+    }
+
+    function addTestimonialCard() {
+        if (!activeWrapper || activeWrapper.dataset.type !== 'testimonials') return;
+        const container = activeWrapper.querySelector('.row');
+        if (!container) return;
+
+        const html = `<div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <p class="card-text" contenteditable="true">"Amazing product! Highly recommended."</p>
+                    <footer class="blockquote-footer" contenteditable="true">Client Name</footer>
+                </div>
+            </div>
+        </div>`;
+
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+        const newElement = temp.firstElementChild;
+        container.appendChild(newElement);
+
+        // Make newly added card clickable and its elements selectable
+        newElement.querySelectorAll('*').forEach(el => {
+            if (!el.classList.contains('card') && el.tagName !== 'DIV') {
+                el.onclick = (e) => { e.stopPropagation(); selectElement(el); };
+            }
+        });
+        newElement.onclick = (e) => { e.stopPropagation(); selectElement(newElement); };
+
+        saveState();
+        selectElement(newElement);
+    }
+
+    function addStatItem() {
+        if (!activeWrapper || activeWrapper.dataset.type !== 'stats') return;
+        const container = activeWrapper.querySelector('.row');
+        if (!container) return;
+
+        const html = `<div class="col-md-3">
+            <h3 class="display-6" contenteditable="true">50+</h3>
+            <p contenteditable="true">Happy Customers</p>
+        </div>`;
+
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+        const newElement = temp.firstElementChild;
+        container.appendChild(newElement);
+
+        // Make newly added stat clickable and its elements selectable
+        newElement.querySelectorAll('*').forEach(el => {
+            if (el.tagName !== 'DIV') {
+                el.onclick = (e) => { e.stopPropagation(); selectElement(el); };
+            }
+        });
+        newElement.onclick = (e) => { e.stopPropagation(); selectElement(newElement); };
+
+        saveState();
+        selectElement(newElement);
     }
 
     function deleteActiveSection() {
